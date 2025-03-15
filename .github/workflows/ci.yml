@@ -2,13 +2,18 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - development
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - development
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -26,10 +31,11 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t myapp:${{ github.sha }} .
-        
+          docker build -t liolax/liolax-docker-image:${{ github.sha }} .
+
       - name: Push Docker Image
         run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag myapp:${{ github.sha }} mydockerhubuser/myapp:${{ github.sha }}
-          docker push mydockerhubuser/myapp:${{ github.sha }}
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker tag liolax/liolax-docker-image:${{ github.sha }} liolax/liolax-docker-image:latest
+          docker push liolax/liolax-docker-image:${{ github.sha }}
+          docker push liolax/liolax-docker-image:latest
