@@ -2,14 +2,13 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -24,3 +23,13 @@ jobs:
 
       - name: Run Tests
         run: npm test
+
+      - name: Build Docker Image
+        run: |
+          docker build -t myapp:${{ github.sha }} .
+        
+      - name: Push Docker Image
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker tag myapp:${{ github.sha }} mydockerhubuser/myapp:${{ github.sha }}
+          docker push mydockerhubuser/myapp:${{ github.sha }}
