@@ -7,6 +7,13 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
+# Copy the private key to the working directory
+COPY privatekey.pem /usr/src/app/
+
+# Copy the server certificate and key to the working directory
+COPY server.crt /usr/src/app/
+COPY server.key /usr/src/app/
+
 # Install application dependencies
 RUN npm install
 
