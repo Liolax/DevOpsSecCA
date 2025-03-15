@@ -3,9 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "test": "node_modules/.bin/mocha --reporter mocha-circleci-reporter test/*.js",
-    "dev": "nodemon ./bin/www"
+    "test": "mocha --reporter mocha-circleci-reporter test/*.js",
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
