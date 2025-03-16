@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",          
-    "dev": "nodemon ./bin/www",                 
-    "test": "mocha --reporter mocha-circleci-reporter './test/**/*.js'", 
-    "lint": "eslint .",                     
-    "build": "echo 'Build step placeholder'"  
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "test": "mocha --reporter mocha-circleci-reporter './test/**/*.js'",
+    "lint": "eslint .",
+    "build": "echo 'Build step placeholder'"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -17,10 +17,11 @@
     "http-errors": "~1.6.3",
     "mocha": "^11.1.0",
     "mocha-circleci-reporter": "^0.0.3",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7",
-    "eslint": "^8.0.0"
+    "eslint": "^8.0.0",
+    "nodemon": "^2.0.7"
   }
 }

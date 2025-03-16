@@ -56,3 +56,8 @@ jobs:
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }}
+
+      # Step 9: Deploy Application
+      - name: Deploy to Server
+        run: |
+          ssh user@yourserver "cd /path/to/project && git pull && npm install && pm2 restart all"

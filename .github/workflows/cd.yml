@@ -19,15 +19,16 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # Step 3: Pull Docker image
+      # Step 3: Pull the Docker image
       - name: Pull Docker Image
         run: |
-          docker pull liolax/my-devopssec-ca-app:latest
+          docker pull liolax/my-devopssec-ca-app:${{ github.ref_name }}
+          docker tag liolax/my-devopssec-ca-app:${{ github.ref_name }} liolax/my-devopssec-ca-app:latest
 
       # Step 4: Deploy to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'liolax-devops-app' 
+          app-name: 'liolax-devops-app'
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           images: 'liolax/my-devopssec-ca-app:${{ github.ref_name }}'
