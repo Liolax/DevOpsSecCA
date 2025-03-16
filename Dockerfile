@@ -7,12 +7,11 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Copy the private key to the working directory
-COPY privatekey.pem /usr/src/app/
-
-# Copy the server certificate and key to the working directory
-COPY server.crt /usr/src/app/
-COPY server.key /usr/src/app/
+# Copy the private key and server certificate to the working directory
+COPY privatekey.pem ./
+COPY server.crt ./
+# Copy server.key
+COPY server.key ./
 
 # Install application dependencies
 RUN npm install
@@ -20,9 +19,8 @@ RUN npm install
 # Copy the rest of the application source code to the container
 COPY . .
 
-# Expose the port that the app runs on
-EXPOSE 3000
+# Expose the ports that the application listens on
+EXPOSE 8080 8443
 
 # Command to start the application
 CMD ["npm", "start"]
-
