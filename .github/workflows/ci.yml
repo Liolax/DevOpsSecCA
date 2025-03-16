@@ -2,37 +2,57 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, development ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, development ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout Code
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      # Step 2: List Files (for debugging purposes)
       - name: List Files
         run: ls -R
 
+      # Step 3: Set Up Node.js
       - name: Set Up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
 
+      # Step 4: Install Dependencies
       - name: Install Dependencies
         run: npm install
 
+      # Step 5: Run Tests
       - name: Run Tests
         run: npm test
 
+      # Step 6: Determine Image Tag
+      - name: Set Docker Image Tag
+        id: vars
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/development" ]; then
+            echo "IMAGE_TAG=development" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "IMAGE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=unknown" >> $GITHUB_ENV
+          fi
+
+      # Step 7: Build Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t myapp:${{ github.sha }} .
-        
+          docker build -t liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }} .
+
+      # Step 8: Push Docker Image to Docker Hub
       - name: Push Docker Image
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag myapp:${{ github.sha }} mydockerhubuser/myapp:${{ github.sha }}
-          docker push mydockerhubuser/myapp:${{ github.sha }}
+          docker push liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }}
