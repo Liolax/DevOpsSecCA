@@ -2,27 +2,31 @@ import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
-import loggerModule from './logger.js'; // Import the default export
+import loggerModule from './logger.js'; // Import the logger module
 
-const { logger, morgan } = loggerModule;
+const { logger, morgan } = loggerModule; // Destructure logger and morgan from the module
 
 import indexRouter from './routes/index.js';
 
 const app = express();
 
-// View engine setup
-app.set('views', path.join(path.resolve(), 'views'));
-app.set('view engine', 'ejs');
+// Set the port dynamically for Azure compatibility
+const PORT = process.env.PORT || 8080;
 
-// Use Morgan with Winston integration
-app.use(morgan('combined', { stream: logger.stream }));
+// View engine setup
+app.set('views', path.join(path.resolve(), 'views')); // Resolve views directory dynamically
+app.set('view engine', 'ejs'); // Set EJS as the templating engine
+
+// Use Morgan for logging, integrated with Winston
+app.use(morgan('combined', { stream: logger.stream })); // Log HTTP requests
 
 // Use additional middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(path.resolve(), 'public')));
+app.use(express.json()); // Parse JSON request bodies
+app.use(express.urlencoded({ extended: false })); // Parse URL-encoded request bodies
+app.use(cookieParser()); // Handle cookies
+app.use(express.static(path.join(path.resolve(), 'public'))); // Serve static files
 
+// Set up routes
 app.use('/', indexRouter);
 
 // Catch 404 and forward to error handler
@@ -32,14 +36,21 @@ app.use((req, res, next) => {
 
 // Error handler
 app.use((err, req, res, next) => {
+  // Provide error details in the response
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // Log the error using Winston
   logger.error(`Error occurred: ${err.message}`);
 
+  // Render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+// Start the server and listen on the designated port
+app.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT}`);
 });
 
 export default app;
