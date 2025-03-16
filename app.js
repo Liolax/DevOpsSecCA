@@ -2,9 +2,25 @@ import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
-import loggerModule from './logger.js'; // Import the logger module
+import morgan from 'morgan';
+import winston from 'winston';
 
-const { logger, morgan } = loggerModule; // Destructure logger and morgan from the module
+// Setup Winston logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(), // Log to the console
+  ],
+});
+
+// Create a Morgan stream for Winston
+const stream = {
+  write: (message) => logger.info(message.trim()),
+};
 
 import indexRouter from './routes/index.js';
 
@@ -18,7 +34,7 @@ app.set('views', path.join(path.resolve(), 'views')); // Resolve views directory
 app.set('view engine', 'ejs'); // Set EJS as the templating engine
 
 // Use Morgan for logging, integrated with Winston
-app.use(morgan('combined', { stream: logger.stream })); // Log HTTP requests
+app.use(morgan('combined', { stream })); // Log HTTP requests
 
 // Use additional middlewares
 app.use(express.json()); // Parse JSON request bodies
