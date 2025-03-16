@@ -3,7 +3,7 @@ name: Continuous Delivery and Deployment
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*' 
 
 jobs:
   deploy:
@@ -19,7 +19,7 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # Step 3: Pull the Docker image
+      # Step 3: Pull Docker Image
       - name: Pull Docker Image
         run: |
           docker pull liolax/my-devopssec-ca-app:${{ github.ref_name }}
