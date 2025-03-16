@@ -13,36 +13,33 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    new winston.transports.Console(), // Log to the console
-  ],
+    new winston.transports.Console() // Log to the console
+  ]
 });
 
 // Create a Morgan stream for Winston
 const stream = {
-  write: (message) => logger.info(message.trim()),
+  write: (message) => logger.info(message.trim())
 };
 
 import indexRouter from './routes/index.js';
 
 const app = express();
 
-// Set the port dynamically for Azure compatibility
-const PORT = process.env.PORT || 8080;
-
 // View engine setup
-app.set('views', path.join(path.resolve(), 'views')); // Resolve views directory dynamically
+app.set('views', path.join(path.resolve(), 'views')); // Dynamically resolve views directory
 app.set('view engine', 'ejs'); // Set EJS as the templating engine
 
 // Use Morgan for logging, integrated with Winston
-app.use(morgan('combined', { stream })); // Log HTTP requests
+app.use(morgan('combined', { stream })); // Log HTTP requests using morgan
 
 // Use additional middlewares
-app.use(express.json()); // Parse JSON request bodies
-app.use(express.urlencoded({ extended: false })); // Parse URL-encoded request bodies
-app.use(cookieParser()); // Handle cookies
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
+app.use(cookieParser()); // Parse cookies
 app.use(express.static(path.join(path.resolve(), 'public'))); // Serve static files
 
-// Set up routes
+// Setup routes
 app.use('/', indexRouter);
 
 // Catch 404 and forward to error handler
@@ -52,7 +49,7 @@ app.use((req, res, next) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  // Provide error details in the response
+  // Set locals, only providing error details in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
@@ -62,11 +59,6 @@ app.use((err, req, res, next) => {
   // Render the error page
   res.status(err.status || 500);
   res.render('error');
-});
-
-// Start the server and listen on the designated port
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
 });
 
 export default app;

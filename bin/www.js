@@ -12,8 +12,8 @@ const activeServers = []; // Track active servers for graceful shutdown
  */
 function normalizePort(val) {
   const port = parseInt(val, 10);
-  if (isNaN(port)) return val; // Named pipe
-  if (port >= 0) return port;  // Port number
+  if (isNaN(port)) return val; // Named pipe.
+  if (port >= 0) return port;  // Port number.
   return false;
 }
 
@@ -22,18 +22,20 @@ function normalizePort(val) {
  */
 function onListening(server) {
   const addr = server.address();
-  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+  const bind =
+    typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
   console.log(`Server successfully started on ${bind}`);
 }
 
 /**
  * Production error handler.
- * In production mode we do not retry on port conflict.
+ * In production mode, we do not retry on a port conflict.
  */
 function onErrorProd(error, portVal) {
   if (error.syscall !== 'listen') throw error;
-  const bind = typeof portVal === 'string' ? 'Pipe ' + portVal : 'Port ' + portVal;
+  const bind =
+    typeof portVal === 'string' ? 'Pipe ' + portVal : 'Port ' + portVal;
   switch (error.code) {
     case 'EACCES':
       console.error(`${bind} requires elevated privileges`);
@@ -61,6 +63,7 @@ function startDevServer(currentPort) {
     if (error.syscall !== 'listen') throw error;
     if (error.code === 'EADDRINUSE') {
       console.warn(`Port ${currentPort} is in use. Retrying on port ${currentPort + 1}...`);
+      // Close current server and retry with the next port
       server.close(() => startDevServer(currentPort + 1));
     } else {
       throw error;
@@ -75,27 +78,40 @@ const devPort = normalizePort(process.env.PORT || '8080');
 const prodHttpsPort = normalizePort(process.env.PORT_HTTPS || '8443');
 
 if (process.env.ENV !== 'DEV') {
-  // PRODUCTION MODE (non-development): Use HTTPS only.
+  // PRODUCTION MODE: Use HTTPS only.
   try {
     // Load SSL certificate and private key
     const privateKey = fs.readFileSync('privatekey.pem', 'utf8');
     const certificate = fs.readFileSync('server.crt', 'utf8');
     const httpsOptions = { key: privateKey, cert: certificate };
 
-    // Set the app's port to the production HTTPS port
+    // Set the port for the app
     app.set('port', prodHttpsPort);
 
-    // Create and start the HTTPS server on prodHttpsPort
+    // Create and start the HTTPS server on the production HTTPS port
     const httpsServer = https.createServer(httpsOptions, app);
     activeServers.push(httpsServer);
-
     httpsServer.listen(prodHttpsPort, () => {
       console.log(`HTTPS server is running on port ${prodHttpsPort}`);
     });
     httpsServer.on('error', (error) => onErrorProd(error, prodHttpsPort));
     httpsServer.on('listening', () => onListening(httpsServer));
 
-    // (Note: In production, we omit an HTTP redirect server to avoid port conflicts.)
+    // Create an HTTP server for redirecting to HTTPS (optional)
+    const httpRedirectServer = http.createServer((req, res) => {
+      const host = req.headers.host.split(':')[0];
+      const httpsUrl = `https://${host}:${prodHttpsPort}${req.url}`;
+      res.writeHead(301, { Location: httpsUrl });
+      console.log(`Redirecting HTTP request to: ${httpsUrl}`);
+      res.end();
+    });
+    activeServers.push(httpRedirectServer);
+    httpRedirectServer.listen(normalizePort(process.env.PORT || '8080'), () => {
+      console.log(`HTTP redirect server is running on port ${process.env.PORT || '8080'}`);
+    });
+    httpRedirectServer.on('error', (error) => onErrorProd(error, process.env.PORT || '8080'));
+    httpRedirectServer.on('listening', () => onListening(httpRedirectServer));
+
   } catch (error) {
     console.error('Failed to configure HTTPS:', error.message);
     process.exit(1);
@@ -105,14 +121,15 @@ if (process.env.ENV !== 'DEV') {
   startDevServer(devPort);
 }
 
-// Global error handlers
+// Global error handlers to catch unhandled exceptions and rejections
 process.on('uncaughtException', (err) => {
   console.error('Unhandled Exception:', err);
-  process.exit(1);
+  process.exit(1); // Exit gracefully
 });
+
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  process.exit(1); // Exit gracefully
 });
 
 // Graceful shutdown: close all active servers on SIGINT
