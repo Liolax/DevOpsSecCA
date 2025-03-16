@@ -1,0 +1,7 @@
+services:
+  app:
+    image: liolax/my-devopssec-ca-app:latest
+    ports:
+      - "8082:8080"
+    environment:
+      NODE_ENV: production

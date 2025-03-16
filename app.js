@@ -1,43 +1,45 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('./logger'); // Import the custom logger
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import loggerModule from './logger.js'; // Import the default export
 
-var indexRouter = require('./routes/index');
+const { logger, morgan } = loggerModule;
 
-var app = express();
+import indexRouter from './routes/index.js';
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
+const app = express();
+
+// View engine setup
+app.set('views', path.join(path.resolve(), 'views'));
 app.set('view engine', 'ejs');
 
-// Use middlewares
-app.use(logger.morgan('dev'));
+// Use Morgan with Winston integration
+app.use(morgan('combined', { stream: logger.stream }));
+
+// Use additional middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(path.resolve(), 'public')));
 
 app.use('/', indexRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
+// Catch 404 and forward to error handler
+app.use((req, res, next) => {
   next(createError(404));
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // Set locals, only providing error in development
+// Error handler
+app.use((err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // Log the error
+  // Log the error using Winston
   logger.error(`Error occurred: ${err.message}`);
 
-  // Render the error page
   res.status(err.status || 500);
   res.render('error');
 });
 
-module.exports = app;
+export default app;

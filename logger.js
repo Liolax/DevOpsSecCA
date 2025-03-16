@@ -1,5 +1,5 @@
-const { createLogger, transports, format } = require('winston');
-const morgan = require('morgan');
+import { createLogger, transports, format } from 'winston';
+import morgan from 'morgan';
 
 const logger = createLogger({
   level: 'info',
@@ -13,11 +13,9 @@ const logger = createLogger({
   ]
 });
 
-// Integrate Winston with Morgan for HTTP request logging
-logger.morgan = morgan('combined', {
-  stream: {
-    write: (message) => logger.info(message.trim())
-  }
-});
+// Create a stream object to use with Morgan
+logger.stream = {
+  write: (message) => logger.info(message.trim())
+};
 
-module.exports = logger;
+export default { logger, morgan };
