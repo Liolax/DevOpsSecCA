@@ -28,11 +28,10 @@ function onListening(server) {
 
 /**
  * Production error handler.
- * In production mode, we do not retry on port conflict.
  */
 function onErrorProd(error, portVal) {
   if (error.syscall !== 'listen') throw error;
-  const bind = typeof portVal === 'string' ? 'Pipe ' + portVal : 'Port ' + portVal;
+  const bind = typeof portVal === 'string' ? 'pipe ' + portVal : 'port ' + portVal;
   switch (error.code) {
     case 'EACCES':
       console.error(`${bind} requires elevated privileges`);
@@ -55,14 +54,13 @@ function startDevServer(currentPort) {
   activeServers.push(server);
 
   server.listen(currentPort, () => {
-    console.log(`HTTP server is running on port ${currentPort}`);
+    console.log(`HTTP server (development) is running on port ${currentPort}`);
   });
 
   server.on('error', (error) => {
     if (error.syscall !== 'listen') throw error;
     if (error.code === 'EADDRINUSE') {
       console.warn(`Port ${currentPort} is in use. Retrying on port ${currentPort + 1}...`);
-      // Close current server and retry with the next port.
       server.close(() => startDevServer(currentPort + 1));
     } else {
       throw error;
@@ -76,27 +74,27 @@ function startDevServer(currentPort) {
 const devPort = normalizePort(process.env.PORT || '8080');
 
 if (process.env.ENV !== 'DEV') {
-  // PRODUCTION MODE: Use the Azure-assigned port (default to 80).
-  // Do not use a custom port like 8443.
+  // PRODUCTION MODE: Use the port provided by Azure, defaulting to 80.
+  // Azure App Service automatically assigns a port via process.env.PORT.
   const prodPort = normalizePort(process.env.PORT || '80');
   app.set('port', prodPort);
 
-  // Create an HTTP server. Azure handles SSL termination externally, so we listen on HTTP.
+  // Create an HTTP server. In production, Azure handles SSL offloading;
+  // therefore, the container should listen via HTTP on the assigned port.
   const server = http.createServer(app);
   activeServers.push(server);
-  
+
   server.listen(prodPort, () => {
-    console.log(`HTTP server is running on port ${prodPort}`);
+    console.log(`HTTP server (production) is running on port ${prodPort}`);
   });
-  
   server.on('error', (error) => onErrorProd(error, prodPort));
   server.on('listening', () => onListening(server));
 } else {
-  // DEVELOPMENT MODE: Use HTTP with race-free retry logic.
+  // DEVELOPMENT MODE: Use HTTP with a fallback retry logic.
   startDevServer(devPort);
 }
 
-// Global error handlers for unhandled exceptions and rejections.
+// Global error handlers for any unhandled exceptions or rejections.
 process.on('uncaughtException', (err) => {
   console.error('Unhandled Exception:', err);
   process.exit(1);
@@ -111,7 +109,9 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('SIGINT', () => {
   console.log('Shutting down servers...');
   activeServers.forEach((server) => {
-    server.close(() => console.log('Server closed'));
+    server.close(() => {
+      console.log('Server closed');
+    });
   });
   process.exit(0);
 });
