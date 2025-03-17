@@ -46,6 +46,11 @@ app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
 app.use(cookieParser()); // Parse cookies
 app.use(express.static(path.join(path.resolve(), 'public'))); // Serve static files
 
+// Health-check route
+app.get('/status', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Setup routes
 app.use('/', indexRouter);
 
