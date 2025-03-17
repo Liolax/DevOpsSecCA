@@ -29,7 +29,6 @@ function onListening(server) {
 
 /**
  * Production error handler.
- * In production mode, we do not retry on port conflict.
  */
 function onErrorProd(error, portVal) {
   if (error.syscall !== 'listen') throw error;
@@ -48,7 +47,7 @@ function onErrorProd(error, portVal) {
 }
 
 /**
- * DEVELOPMENT: Start an HTTP server with retry logic.
+ * DEVELOPMENT MODE: Start an HTTP server with retry logic.
  */
 function startDevServer(currentPort) {
   const server = http.createServer(app);
@@ -62,7 +61,6 @@ function startDevServer(currentPort) {
     if (error.syscall !== 'listen') throw error;
     if (error.code === 'EADDRINUSE') {
       console.warn(`Port ${currentPort} is in use. Retrying on port ${currentPort + 1}...`);
-      // Close current server and retry with the next port
       server.close(() => startDevServer(currentPort + 1));
     } else {
       throw error;
@@ -75,12 +73,12 @@ function startDevServer(currentPort) {
 // Retrieve port configurations
 const devPort = normalizePort(process.env.PORT || '8080');
 
+// Production configuration: In Azure App Service, the container should listen on the port provided by process.env.PORT (defaulting to 80)
 if (process.env.ENV !== 'DEV') {
-  // PRODUCTION MODE: Use the Azure-assigned port
   const prodPort = normalizePort(process.env.PORT || '80');
   app.set('port', prodPort);
 
-  const server = http.createServer(app);
+  const server = http.createServer(app); // In production, SSL termination is handled by Azure (HTTPS offloading), so the container listens on HTTP (port 80)
   activeServers.push(server);
   
   server.listen(prodPort, () => {
@@ -94,18 +92,18 @@ if (process.env.ENV !== 'DEV') {
   startDevServer(devPort);
 }
 
-// Global error handlers for unhandled exceptions and rejections
+// Global error handlers for unhandled exceptions and rejections.
 process.on('uncaughtException', (err) => {
   console.error('Unhandled Exception:', err);
-  process.exit(1); // Exit gracefully
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1); // Exit gracefully
+  process.exit(1);
 });
 
-// Graceful shutdown: Close all active servers on SIGINT
+// Graceful shutdown: Close all active servers on SIGINT.
 process.on('SIGINT', () => {
   console.log('Shutting down servers...');
   activeServers.forEach((server) => {
