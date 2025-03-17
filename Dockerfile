@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Copy the SSL certificate files if you're using them (optional if using Azure-managed certificates)
+# Copy the SSL certificate files if needed (optional for Azure-managed SSL)
 COPY privatekey.pem ./
 COPY server.crt ./
 COPY server.key ./
@@ -18,7 +18,7 @@ RUN npm install
 # Copy the rest of the application source code to the container
 COPY . .
 
-# Expose standard ports expected by Azure App Service (HTTP on 80, HTTPS on 443)
+# Expose standard ports for Azure: 80 (HTTP) and 443 (HTTPS)
 EXPOSE 80 443
 
 # Command to start the application

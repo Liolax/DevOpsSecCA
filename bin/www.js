@@ -28,7 +28,7 @@ function onListening(server) {
 
 /**
  * Production error handler.
- * In production mode, we do not retry on a port conflict.
+ * In production mode, we do not retry on port conflict.
  */
 function onErrorProd(error, portVal) {
   if (error.syscall !== 'listen') throw error;
@@ -37,9 +37,11 @@ function onErrorProd(error, portVal) {
     case 'EACCES':
       console.error(`${bind} requires elevated privileges`);
       process.exit(1);
+      break;
     case 'EADDRINUSE':
       console.error(`${bind} is already in use`);
       process.exit(1);
+      break;
     default:
       throw error;
   }
@@ -60,6 +62,7 @@ function startDevServer(currentPort) {
     if (error.syscall !== 'listen') throw error;
     if (error.code === 'EADDRINUSE') {
       console.warn(`Port ${currentPort} is in use. Retrying on port ${currentPort + 1}...`);
+      // Close current server and retry with the next port.
       server.close(() => startDevServer(currentPort + 1));
     } else {
       throw error;
@@ -69,24 +72,27 @@ function startDevServer(currentPort) {
   server.on('listening', () => onListening(server));
 }
 
-// Retrieve port configurations
+// Retrieve port configuration for development.
 const devPort = normalizePort(process.env.PORT || '8080');
 
-// For production on Azure, we use the port provided by process.env.PORT (Azure typically sets this to 80)
 if (process.env.ENV !== 'DEV') {
+  // PRODUCTION MODE: Use the Azure-assigned port (default to 80).
+  // Do not use a custom port like 8443.
   const prodPort = normalizePort(process.env.PORT || '80');
   app.set('port', prodPort);
 
-  const server = http.createServer(app); // In production, let Azure handle SSL offloading.
+  // Create an HTTP server. Azure handles SSL termination externally, so we listen on HTTP.
+  const server = http.createServer(app);
   activeServers.push(server);
-
+  
   server.listen(prodPort, () => {
     console.log(`HTTP server is running on port ${prodPort}`);
   });
+  
   server.on('error', (error) => onErrorProd(error, prodPort));
   server.on('listening', () => onListening(server));
 } else {
-  // DEVELOPMENT MODE: Use HTTP with fallback retry logic.
+  // DEVELOPMENT MODE: Use HTTP with race-free retry logic.
   startDevServer(devPort);
 }
 
