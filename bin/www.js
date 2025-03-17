@@ -21,19 +21,18 @@ function normalizePort(val) {
  */
 function onListening(server) {
   const addr = server.address();
-  const bind =
-    typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
   console.log(`Server successfully started on ${bind}`);
 }
 
 /**
  * Production error handler.
+ * In production mode, we do not retry on a port conflict.
  */
 function onErrorProd(error, portVal) {
   if (error.syscall !== 'listen') throw error;
-  const bind =
-    typeof portVal === 'string' ? 'Pipe ' + portVal : 'Port ' + portVal;
+  const bind = typeof portVal === 'string' ? 'Pipe ' + portVal : 'Port ' + portVal;
   switch (error.code) {
     case 'EACCES':
       console.error(`${bind} requires elevated privileges`);
@@ -73,18 +72,17 @@ function startDevServer(currentPort) {
 // Retrieve port configurations
 const devPort = normalizePort(process.env.PORT || '8080');
 
-// Production configuration: In Azure App Service, the container should listen on the port provided by process.env.PORT (defaulting to 80)
+// For production on Azure, we use the port provided by process.env.PORT (Azure typically sets this to 80)
 if (process.env.ENV !== 'DEV') {
   const prodPort = normalizePort(process.env.PORT || '80');
   app.set('port', prodPort);
 
-  const server = http.createServer(app); // In production, SSL termination is handled by Azure (HTTPS offloading), so the container listens on HTTP (port 80)
+  const server = http.createServer(app); // In production, let Azure handle SSL offloading.
   activeServers.push(server);
-  
+
   server.listen(prodPort, () => {
     console.log(`HTTP server is running on port ${prodPort}`);
   });
-  
   server.on('error', (error) => onErrorProd(error, prodPort));
   server.on('listening', () => onListening(server));
 } else {
