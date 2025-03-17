@@ -4,23 +4,22 @@ FROM node:14
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy package.json and package-lock.json into the container
 COPY package*.json ./
 
-# Copy the private key and server certificate to the working directory
+# Copy the SSL certificate files if you're using them (not typically needed if Azure manages SSL)
 COPY privatekey.pem ./
 COPY server.crt ./
-# Copy server.key
 COPY server.key ./
 
-# Install application dependencies
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application source code to the container
+# Copy the remaining application source code into the container
 COPY . .
 
-# Expose the ports that the application listens on
-EXPOSE 8080 8443
+# Expose standard ports (80 for HTTP and 443 for HTTPS)
+EXPOSE 80 443
 
-# Command to start the application
+# Commence the application startup
 CMD ["npm", "start"]
