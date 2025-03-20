@@ -1,44 +1,45 @@
-import app from '../app.js';
+import { createApp } from '../app.js';
 import debugLib from 'debug';
 import http from 'http';
+import https from 'https';
 import fs from 'fs';
+import winston from 'winston';
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [new winston.transports.Console()]
+});
 
 const debug = debugLib('phishsense:server');
-const activeServers = []; // Track active servers for graceful shutdown
+const activeServers = [];
 
-/**
- * Normalize a port into a number, string, or false.
- */
 function normalizePort(val) {
   const port = parseInt(val, 10);
-  if (isNaN(port)) return val; // Named pipe.
-  if (port >= 0) return port;  // Port number.
+  if (isNaN(port)) return val;
+  if (port >= 0) return port;
   return false;
 }
 
-/**
- * Log when the server starts listening.
- */
 function onListening(server) {
   const addr = server.address();
-  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-  debug('Listening on ' + bind);
-  console.log(`Server successfully started on ${bind}`);
+  const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
+  logger.info(`Listening on ${bind}`);
 }
 
-/**
- * Production error handler.
- */
 function onErrorProd(error, portVal) {
   if (error.syscall !== 'listen') throw error;
-  const bind = typeof portVal === 'string' ? 'pipe ' + portVal : 'port ' + portVal;
+  const bind = typeof portVal === 'string' ? `pipe ${portVal}` : `port ${portVal}`;
   switch (error.code) {
     case 'EACCES':
-      console.error(`${bind} requires elevated privileges`);
+      logger.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(`${bind} is already in use`);
+      logger.error(`${bind} is already in use`);
       process.exit(1);
       break;
     default:
@@ -46,72 +47,48 @@ function onErrorProd(error, portVal) {
   }
 }
 
-/**
- * DEVELOPMENT MODE: Start an HTTP server with retry logic.
- */
-function startDevServer(currentPort) {
-  const server = http.createServer(app);
-  activeServers.push(server);
-
-  server.listen(currentPort, () => {
-    console.log(`HTTP server (development) is running on port ${currentPort}`);
-  });
-
-  server.on('error', (error) => {
-    if (error.syscall !== 'listen') throw error;
-    if (error.code === 'EADDRINUSE') {
-      console.warn(`Port ${currentPort} is in use. Retrying on port ${currentPort + 1}...`);
-      server.close(() => startDevServer(currentPort + 1));
-    } else {
-      throw error;
-    }
-  });
-
-  server.on('listening', () => onListening(server));
-}
-
-// Retrieve port configuration for development.
 const devPort = normalizePort(process.env.PORT || '8080');
+const app = createApp();
 
 if (process.env.ENV !== 'DEV') {
-  // PRODUCTION MODE: Use the port provided by Azure, defaulting to 80.
-  // Azure App Service automatically assigns a port via process.env.PORT.
   const prodPort = normalizePort(process.env.PORT || '80');
   app.set('port', prodPort);
-
-  // Create an HTTP server. In production, Azure handles SSL offloading;
-  // therefore, the container should listen via HTTP on the assigned port.
-  const server = http.createServer(app);
+  // Using PFX certificate for HTTPS
+  const server = process.env.HTTPS === 'true'
+    ? https.createServer(
+        { 
+          pfx: fs.readFileSync('./deployment/ssl.pfx'),
+          passphrase: process.env.PFX_PASSPHRASE || ''
+        },
+        app
+      )
+    : http.createServer(app);
   activeServers.push(server);
 
-  server.listen(prodPort, () => {
-    console.log(`HTTP server (production) is running on port ${prodPort}`);
-  });
+  server.listen(prodPort, () => logger.info(`HTTP server (production) is running on port ${prodPort}`));
   server.on('error', (error) => onErrorProd(error, prodPort));
   server.on('listening', () => onListening(server));
 } else {
-  // DEVELOPMENT MODE: Use HTTP with a fallback retry logic.
-  startDevServer(devPort);
+  const server = http.createServer(app);
+  activeServers.push(server);
+  server.listen(devPort, () => logger.info(`HTTP server (development) is running on port ${devPort}`));
+  server.on('listening', () => onListening(server));
 }
 
-// Global error handlers for any unhandled exceptions or rejections.
 process.on('uncaughtException', (err) => {
-  console.error('Unhandled Exception:', err);
+  logger.error('Unhandled Exception:', err);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
 
-// Graceful shutdown: Close all active servers on SIGINT.
 process.on('SIGINT', () => {
-  console.log('Shutting down servers...');
+  logger.info('Shutting down servers...');
   activeServers.forEach((server) => {
-    server.close(() => {
-      console.log('Server closed');
-    });
+    server.close(() => logger.info('Server closed'));
   });
   process.exit(0);
 });

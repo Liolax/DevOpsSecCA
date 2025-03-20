@@ -1,21 +1,16 @@
-# Use an official Node.js runtime as the base image
-FROM node:14
+# Use a lightweight Node.js runtime as the base image
+FROM node:14-slim
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy package.json and package-lock.json to leverage Docker caching
 COPY package*.json ./
-
-# Copy the SSL certificate files if needed (optional for Azure-managed SSL)
-COPY privatekey.pem ./
-COPY server.crt ./
-COPY server.key ./
 
 # Install application dependencies
 RUN npm install
 
-# Copy the rest of the application source code to the container
+# Copy the rest of the application source code
 COPY . .
 
 # Expose standard ports for Azure: 80 (HTTP) and 443 (HTTPS)

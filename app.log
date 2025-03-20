@@ -1,0 +1,30 @@
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:40:20 +0000] \"GET / HTTP/1.1\" 200 8 \"-\" \"-\"","timestamp":"2025-03-20T10:40:20.704Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:40:20 +0000] \"GET /status HTTP/1.1\" 200 2 \"-\" \"-\"","timestamp":"2025-03-20T10:40:20.717Z"}
+{"level":"error","message":"Error occurred: Not Found","timestamp":"2025-03-20T10:40:20.724Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:40:20 +0000] \"GET /unknown-route HTTP/1.1\" 404 1960 \"-\" \"-\"","timestamp":"2025-03-20T10:40:20.738Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:40:20 +0000] \"GET /home?title=123 HTTP/1.1\" 200 215 \"-\" \"-\"","timestamp":"2025-03-20T10:40:20.750Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:40:20 +0000] \"GET /home?title=Test HTTP/1.1\" 200 217 \"-\" \"-\"","timestamp":"2025-03-20T10:40:20.760Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:43:22 +0000] \"GET / HTTP/1.1\" 200 8 \"-\" \"-\"","timestamp":"2025-03-20T10:43:22.180Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:43:22 +0000] \"GET /status HTTP/1.1\" 200 2 \"-\" \"-\"","timestamp":"2025-03-20T10:43:22.195Z"}
+{"level":"error","message":"Error occurred: Not Found","timestamp":"2025-03-20T10:43:22.201Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:43:22 +0000] \"GET /unknown-route HTTP/1.1\" 404 1960 \"-\" \"-\"","timestamp":"2025-03-20T10:43:22.208Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:43:22 +0000] \"GET /home?title=123 HTTP/1.1\" 400 94 \"-\" \"-\"","timestamp":"2025-03-20T10:43:22.219Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:43:22 +0000] \"GET /home?title=Test HTTP/1.1\" 200 217 \"-\" \"-\"","timestamp":"2025-03-20T10:43:22.227Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:16 +0000] \"GET / HTTP/1.1\" 200 8 \"-\" \"-\"","timestamp":"2025-03-20T10:57:16.933Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:16 +0000] \"GET /status HTTP/1.1\" 200 2 \"-\" \"-\"","timestamp":"2025-03-20T10:57:16.948Z"}
+{"level":"error","message":"Error occurred: Not Found","timestamp":"2025-03-20T10:57:16.956Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:16 +0000] \"GET /unknown-route HTTP/1.1\" 404 1960 \"-\" \"-\"","timestamp":"2025-03-20T10:57:16.967Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:16 +0000] \"GET /home?title=123 HTTP/1.1\" 400 94 \"-\" \"-\"","timestamp":"2025-03-20T10:57:16.979Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:16 +0000] \"GET /home?title=Test HTTP/1.1\" 200 217 \"-\" \"-\"","timestamp":"2025-03-20T10:57:16.987Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:30 +0000] \"GET / HTTP/1.1\" 200 8 \"-\" \"-\"","timestamp":"2025-03-20T10:57:30.168Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:30 +0000] \"GET /status HTTP/1.1\" 200 2 \"-\" \"-\"","timestamp":"2025-03-20T10:57:30.182Z"}
+{"level":"error","message":"Error occurred: Not Found","timestamp":"2025-03-20T10:57:30.188Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:30 +0000] \"GET /unknown-route HTTP/1.1\" 404 1960 \"-\" \"-\"","timestamp":"2025-03-20T10:57:30.195Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:30 +0000] \"GET /home?title=123 HTTP/1.1\" 400 94 \"-\" \"-\"","timestamp":"2025-03-20T10:57:30.208Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:30 +0000] \"GET /home?title=Test HTTP/1.1\" 200 217 \"-\" \"-\"","timestamp":"2025-03-20T10:57:30.216Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:40 +0000] \"GET / HTTP/1.1\" 200 8 \"-\" \"-\"","timestamp":"2025-03-20T10:57:40.809Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:40 +0000] \"GET /status HTTP/1.1\" 200 2 \"-\" \"-\"","timestamp":"2025-03-20T10:57:40.823Z"}
+{"level":"error","message":"Error occurred: Not Found","timestamp":"2025-03-20T10:57:40.829Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:40 +0000] \"GET /unknown-route HTTP/1.1\" 404 1960 \"-\" \"-\"","timestamp":"2025-03-20T10:57:40.837Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:40 +0000] \"GET /home?title=123 HTTP/1.1\" 400 94 \"-\" \"-\"","timestamp":"2025-03-20T10:57:40.848Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Mar/2025:10:57:40 +0000] \"GET /home?title=Test HTTP/1.1\" 200 217 \"-\" \"-\"","timestamp":"2025-03-20T10:57:40.856Z"}

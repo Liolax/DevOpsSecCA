@@ -1,0 +1,39 @@
+{
+    "resourceGroupName": {
+      "value": "DevOpsSecResourceGroup"
+    },
+    "name": {
+      "value": "liolax-devops-app"
+    },
+    "location": {
+      "value": "UK West"
+    },
+    "hostingPlanName": {
+      "value": "DevOpsSecPlan"
+    },
+    "serverFarmResourceGroup": {
+      "value": "DevOpsSecResourceGroup"
+    },
+    "alwaysOn": {
+      "value": true
+    },
+    "ftpsState": {
+      "value": "Disabled"
+    },
+    "linuxFxVersion": {
+      "value": "DOCKER|liolax/my-devopssec-ca-app:v2"
+    },
+    "dockerRegistryUrl": {
+      "value": "https://hub.docker.com/u/liolax"
+    },
+    "dockerRegistryUsername": {
+      "value": "liolax"
+    },
+    "dockerRegistryPassword": {
+      "value": "7M7x.XQT_3-XgG2"
+    },
+    "dockerRegistryStartupCommand": {
+      "value": "npm start"
+    }
+  }
+  

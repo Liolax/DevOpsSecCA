@@ -6,3 +6,6 @@ services:
       - "80:80"
     environment:
       NODE_ENV: production
+    restart: always
+    volumes:
+      - ./logs:/usr/src/app/logs

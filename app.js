@@ -4,6 +4,8 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import winston from 'winston';
+import rateLimit from 'express-rate-limit';
+import indexRouter from './routes/index.js';
 
 // Setup Winston logger
 const logger = winston.createLogger({
@@ -13,7 +15,8 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    new winston.transports.Console() // Log to the console
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'app.log' })
   ]
 });
 
@@ -22,55 +25,47 @@ const stream = {
   write: (message) => logger.info(message.trim())
 };
 
-import indexRouter from './routes/index.js';
+export function createApp() {
+  const app = express();
 
-const app = express();
+  // View engine setup
+  app.set('views', path.join(path.resolve(), 'views'));
+  app.set('view engine', 'ejs');
 
-// View engine setup
-app.set('views', path.join(path.resolve(), 'views')); // Dynamically resolve views directory
-app.set('view engine', 'ejs'); // Set EJS as the templating engine
+  // Apply security and optimization middlewares
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // Limit each IP to 100 requests per window
+  });
+  app.use(limiter);
 
-// Use Morgan for HTTP request logging, integrated with Winston
-app.use(morgan('combined', { stream }));
+  app.use(morgan('combined', { stream }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+  app.use(cookieParser());
+  app.use(express.static(path.join(path.resolve(), 'public')));
 
-// Cache-Control Header Middleware
-app.use((req, res, next) => {
-  const cacheControl = process.env.CACHE_CONTROL || 'no-store, no-cache, must-revalidate, proxy-revalidate';
-  res.setHeader('Cache-Control', cacheControl);
-  next();
-});
+  // Health-check route
+  app.get('/status', (_, res) => {
+    res.status(200).send('OK');
+  });
 
-// Use additional middlewares
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
-app.use(cookieParser()); // Parse cookies
-app.use(express.static(path.join(path.resolve(), 'public'))); // Serve static files
+  // Setup routes
+  app.use('/', indexRouter);
 
-// Health-check route
-app.get('/status', (req, res) => {
-  res.status(200).send('OK');
-});
+  // Catch 404 and forward to error handler
+  app.use((req, res, next) => {
+    next(createError(404));
+  });
 
-// Setup routes
-app.use('/', indexRouter);
+  // Error handler
+  app.use((err, req, res, next) => {
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+    logger.error(`Error occurred: ${err.message}`);
+    res.status(err.status || 500);
+    res.render('error');
+  });
 
-// Catch 404 and forward to error handler
-app.use((req, res, next) => {
-  next(createError(404));
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  // Set locals, only providing error details in development.
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // Log the error using Winston.
-  logger.error(`Error occurred: ${err.message}`);
-
-  // Render the error page.
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-export default app;
+  return app;
+}

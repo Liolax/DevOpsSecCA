@@ -58,8 +58,7 @@ jobs:
 
       # Step 7: Build Docker Image
       - name: Build Docker Image
-        run: |
-          docker build -t liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }} .
+        run: docker build -t liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }} .
 
       # Step 8: Docker Security Scan
       - name: Docker Security Scan
@@ -70,3 +69,12 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker push liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }}
+          
+      # Step 10: Enhanced Health Check Validation
+      - name: Test Health Endpoint
+        run: |
+          docker run -d --name health-check -p 80:80 liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }}
+          sleep 5
+          curl -f http://localhost:80/status || docker logs health-check
+          docker stop health-check
+          docker rm health-check
