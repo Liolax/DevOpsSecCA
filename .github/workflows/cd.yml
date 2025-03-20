@@ -23,7 +23,7 @@ jobs:
       - name: Pull Docker Image
         run: |
           docker pull liolax/my-devopssec-ca-app:${{ github.ref_name }}
-          docker tag liolax/my-devopssec-ca-app:${{ github.ref_name }} liolax/my-devopssec-ca-app:latest
+          docker tag liolax/my-devopssec-ca-app:${{ github.ref_name }} liolax/my-devopssec-ca-app:v2
 
       # Step 4: Deploy to Azure Web App
       - name: Deploy to Azure Web App

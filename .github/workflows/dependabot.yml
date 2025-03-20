@@ -1,0 +1,26 @@
+# Dependabot configuration file
+name: Dependabot Updates
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Fetch Dependabot Metadata
+        uses: dependabot/fetch-metadata@v1
+      - name: Configure Dependabot
+        uses: dependabot/dependabot-action@v2
+        with:
+          package-ecosystem: "npm"  # Use npm as the package manager
+          directory: "/"            # Directory containing the dependencies
+          schedule-interval: "daily" # Check updates daily
+          commit-message-prefix: "chore(deps):"
+          commit-message-include: "scope" # Add scope to commit messages
+          pull-request-branch-name-separator: "-"
+          rebase-strategy: "auto"   # Automatically rebase pull requests
+          labels: "dependencies,security" # Tag pull requests

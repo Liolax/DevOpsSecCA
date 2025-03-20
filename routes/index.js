@@ -9,7 +9,7 @@ router.get('/', (_, res) => {
 
 // GET home page with input validation
 router.get('/home', [
-  // Validate that "title" is not purely numeric.
+  // Validate that title is not purely numeric.
   check('title').custom(value => {
     if (!isNaN(value)) {
       throw new Error('Title must be a string');
