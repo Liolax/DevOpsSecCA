@@ -19,9 +19,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Step 2: List Files (for debugging purposes)
-      - name: List Files
-        run: ls -R
+      # Step 2: Cache Node Modules
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       # Step 3: Set Up Node.js
       - name: Set Up Node.js
@@ -37,7 +42,7 @@ jobs:
       - name: Run Tests
         run: npm test
 
-      # Step 6: Determine Docker Image Tag
+      # Step 6: Set Docker Image Tag
       - name: Set Docker Image Tag
         id: vars
         run: |
@@ -56,7 +61,11 @@ jobs:
         run: |
           docker build -t liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }} .
 
-      # Step 8: Push Docker Image to Docker Hub
+      # Step 8: Docker Security Scan
+      - name: Docker Security Scan
+        run: docker run --rm aquasec/trivy image liolax/my-devopssec-ca-app:${{ env.IMAGE_TAG }}
+
+      # Step 9: Push Docker Image to Docker Hub
       - name: Push Docker Image
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
