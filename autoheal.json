@@ -1,16 +1,15 @@
 {
-    "autoHealEnabled": true,
-    "autoHealRules": {
-      "triggers": {
-        "slowRequests": {
-          "count": 5,
-          "timeInterval": "00:01:00",
-          "minRequestTime": "00:00:10"
-        }
-      },
-      "actions": {
-        "actionType": "Recycle"
+  "autoHealEnabled": true,
+  "autoHealRules": {
+    "triggers": {
+      "slowRequests": {
+        "count": 3,
+        "timeInterval": "00:15:00",
+        "minRequestTime": "00:01:00"
       }
+    },
+    "actions": {
+      "actionType": "Recycle"
     }
   }
-  
+}
