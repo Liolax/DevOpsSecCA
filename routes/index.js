@@ -9,11 +9,15 @@ router.get('/', (_, res) => {
 
 // GET home page with input validation
 router.get('/home', [
-  // Validate that title is a non-empty string and not purely numeric.
   check('title')
     .optional()
-    .isString()
-    .withMessage('Title must be a string')
+    .custom(value => {
+      // If the value consists solely of digits, it's considered invalid.
+      if (/^\d+$/.test(value)) {
+        throw new Error('Title must be a string');
+      }
+      return true;
+    })
     .notEmpty()
     .withMessage('Title cannot be empty')
 ], (req, res) => {

@@ -5,7 +5,7 @@ import { createApp } from '../app.js';
 describe('Backend Tests', function () {
   let app;
 
-  // Create a fresh instance of the app before tests
+  // Create a fresh instance of the app before tests run
   before(() => {
     app = createApp();
   });
@@ -37,6 +37,7 @@ describe('Backend Tests', function () {
   describe('Input Validation', function () {
     it('should return 400 for invalid query parameter', async function () {
       const response = await request(app).get('/home?title=123');
+      // Expect a 400 error because "123" is numeric.
       assert.strictEqual(response.status, 400);
       assert(response.body.errors.some(e => e.msg === 'Title must be a string'));
     });
